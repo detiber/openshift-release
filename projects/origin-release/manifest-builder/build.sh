@@ -37,5 +37,4 @@ done
 set +x
 username=$(jq --raw-output ".\"${OUTPUT_REGISTRY}\".username" "${PUSH_DOCKERCFG_PATH}/.dockercfg")
 password=$(jq --raw-output ".\"${OUTPUT_REGISTRY}\".password" "${PUSH_DOCKERCFG_PATH}/.dockercfg")
-set -x
 manifest-tool --debug --username=${username} --password=${password} push from-spec manifest.yaml
