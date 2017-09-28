@@ -65,6 +65,12 @@ objects:
         scheduled: true
     - from:
         kind: DockerImage
+        name: sinenomine/clefos-base-s390x:latest
+      name: s390x-clefos-latest
+      importPolicy:
+        scheduled: true
+    - from:
+        kind: DockerImage
         name:  "${PUBLISH_REPO}/${NAME}:x86_64-golang-1.8"
       name: x86_64-golang-1.8
       importPolicy:
@@ -79,6 +85,12 @@ objects:
         kind: DockerImage
         name:  "${PUBLISH_REPO}/${NAME}:ppc64le-golang-1.8"
       name: ppc64le-golang-1.8
+      importPolicy:
+        scheduled: true
+    - from:
+        kind: DockerImage
+        name:  "${PUBLISH_REPO}/${NAME}:s390x-golang-1.8"
+      name: s390x-golang-1.8
       importPolicy:
         scheduled: true
     - from:
@@ -147,6 +159,46 @@ objects:
     - type: ConfigChange
     - type: ImageChange
       imageChange: {}
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    labels:
+      app: "${NAME}"
+    name: "${NAME}-s390x-clefos-7"
+  spec:
+    runPolicy: SerialLatestOnly
+    successfulBuildsHistoryLimit: 1
+    failedBuildsHistoryLimit: 2
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "${NAME}:s390x-clefos-7"
+    source:
+      git:
+        ref: "${SOURCE_REF}"
+        uri: "${SOURCE_URL}"
+      contextDir: "${SOURCE_CONTEXT_BASE}/s390x-clefos-7/"
+      type: Git
+    strategy:
+      customStrategy:
+        from:
+          kind: ImageStreamTag
+          name: "${NAME}:release-image-builder"
+        exposeDockerSocket: true
+        env:
+        - name: ARCH
+          value: s390x
+        - name: BASE_IMAGE_STREAM_TAG
+          value: "${NAME}:s390x-clefos-latest"
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChange: {}
+    - type: ImageChange
+      imageChange:
+        from:
+          kind: ImageStreamTag
+          name: "${NAME}:s390x-clefos-latest"
 - kind: BuildConfig
   apiVersion: v1
   metadata:
@@ -272,6 +324,46 @@ objects:
   metadata:
     labels:
       app: "${NAME}"
+    name: "${NAME}-s390x-base"
+  spec:
+    runPolicy: SerialLatestOnly
+    successfulBuildsHistoryLimit: 1
+    failedBuildsHistoryLimit: 2
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "${NAME}:s390x-base"
+    source:
+      git:
+        ref: "${SOURCE_REF}"
+        uri: "${SOURCE_URL}"
+      contextDir: "${SOURCE_CONTEXT_BASE}/base/"
+      type: Git
+    strategy:
+      customStrategy:
+        from:
+          kind: ImageStreamTag
+          name: "${NAME}:release-image-builder"
+        exposeDockerSocket: true
+        env:
+        - name: ARCH
+          value: s390x
+        - name: BASE_IMAGE_STREAM_TAG
+          value: "${NAME}:s390x-clefos-7"
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChange: {}
+    - type: ImageChange
+      imageChange:
+        from:
+          kind: ImageStreamTag
+          name: "${NAME}:s390x-clefos-7"
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    labels:
+      app: "${NAME}"
     name: "${NAME}-x86-64-golang-1.8"
   spec:
     runPolicy: SerialLatestOnly
@@ -387,6 +479,46 @@ objects:
         from:
           kind: ImageStreamTag
           name: "${NAME}:ppc64le-base"
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    labels:
+      app: "${NAME}"
+    name: "${NAME}-s390x-golang-1.8"
+  spec:
+    runPolicy: SerialLatestOnly
+    successfulBuildsHistoryLimit: 1
+    failedBuildsHistoryLimit: 2
+    output:
+      to:
+        kind: DockerImage
+        name: "${PUBLISH_REPO}/${NAME}:s390x-golang-1.8"
+      pushSecret:
+        name: "dockerhub"
+    source:
+      git:
+        ref: "${SOURCE_REF}"
+        uri: "${SOURCE_URL}"
+      contextDir: "${SOURCE_CONTEXT_BASE}/golang-1.8/"
+      type: Git
+    strategy:
+      customStrategy:
+        from:
+          kind: ImageStreamTag
+          name: "${NAME}:release-image-builder"
+        exposeDockerSocket: true
+        env:
+        - name: ARCH
+          value: s390x
+        - name: BASE_IMAGE_STREAM_TAG
+          value: "${NAME}:s390x-base"
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChange:
+        from:
+          kind: ImageStreamTag
+          name: "${NAME}:s390x-base"
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -436,6 +568,11 @@ objects:
         from:
           kind: ImageStreamTag
           name: "${NAME}:ppc64le-golang-1.8"
+    - type: ImageChange
+      imageChange:
+        from:
+          kind: ImageStreamTag
+          name: "${NAME}:s390x-golang-1.8"
 - kind: BuildConfig
   apiVersion: v1
   metadata:
