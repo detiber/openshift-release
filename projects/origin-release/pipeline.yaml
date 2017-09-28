@@ -53,7 +53,7 @@ objects:
         scheduled: true
     - from:
         kind: DockerImage
-        name: centos/aarch64:7
+        name: arm64v8/centos:7
       name: aarch64-centos-7
       importPolicy:
         scheduled: true
